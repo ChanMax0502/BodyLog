@@ -20,12 +20,12 @@ struct TodayView: View {
 
                         if let first = trackerStore.trackers.first {
                             TodayMonthGrid(tracker: first, referenceDate: currentDate)
-                                .padding(.horizontal, AppSpacing.l)
+                                .padding(.horizontal, 15)
                         } else {
                             EmptyTrackerCard {
                                 showCreate = true
                             }
-                            .padding(.horizontal, AppSpacing.l)
+                            .padding(.horizontal, 15)
                         }
                     }
                     .padding(.bottom, AppSpacing.xxl)

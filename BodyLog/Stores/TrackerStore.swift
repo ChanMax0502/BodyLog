@@ -11,6 +11,22 @@ final class TrackerStore: ObservableObject {
     init(context: NSManagedObjectContext) {
         self.context = context
         reload()
+        bootstrapDefaultTrackerIfNeeded()
+    }
+
+    private func bootstrapDefaultTrackerIfNeeded() {
+        let key = "BodyLog.DidBootstrapDefaultTracker"
+        guard !UserDefaults.standard.bool(forKey: key) else { return }
+        defer { UserDefaults.standard.set(true, forKey: key) }
+        guard trackers.isEmpty else { return }
+
+        let tracker = Tracker(context: context)
+        tracker.id = UUID()
+        tracker.name = "默认追踪"
+        tracker.goalDescription = nil
+        tracker.createdAt = Date()
+        save()
+        reload()
     }
 
     func reload() {
