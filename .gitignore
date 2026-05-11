@@ -1,0 +1,35 @@
+## XcodeGen 生成物
+BodyLog.xcodeproj/
+
+## Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## SwiftPM
+.build/
+Package.resolved
+.swiftpm/
+
+## macOS
+.DS_Store
+
+## CocoaPods (未使用，预防误提交)
+Pods/
+
+## Fastlane
+fastlane/report.xml
+fastlane/screenshots/
+fastlane/test_output/
+
+## VSCode
+.vscode/

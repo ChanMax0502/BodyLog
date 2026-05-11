@@ -1,0 +1,69 @@
+import CoreData
+import Foundation
+import SwiftUI
+
+@MainActor
+final class TrackerStore: ObservableObject {
+    @Published private(set) var trackers: [Tracker] = []
+
+    private let context: NSManagedObjectContext
+
+    init(context: NSManagedObjectContext) {
+        self.context = context
+        reload()
+    }
+
+    func reload() {
+        let req = Tracker.fetchRequest()
+        req.sortDescriptors = [NSSortDescriptor(keyPath: \Tracker.createdAt, ascending: false)]
+        trackers = (try? context.fetch(req)) ?? []
+    }
+
+    @discardableResult
+    func create(name rawName: String?, goal: String?) -> Tracker {
+        let trimmed = rawName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let finalName: String = {
+            if let trimmed, !trimmed.isEmpty { return trimmed }
+            return nextDefaultName()
+        }()
+
+        let tracker = Tracker(context: context)
+        tracker.id = UUID()
+        tracker.name = finalName
+        tracker.goalDescription = (goal?.isEmpty == false) ? goal : nil
+        tracker.createdAt = Date()
+
+        save()
+        reload()
+        return tracker
+    }
+
+    func delete(_ tracker: Tracker) {
+        let id = tracker.id
+        try? ImageStorage.shared.deleteAll(trackerId: id)
+        ReminderScheduler.shared.cancel(trackerId: id)
+        context.delete(tracker)
+        save()
+        reload()
+    }
+
+    private func save() {
+        guard context.hasChanges else { return }
+        do { try context.save() } catch {
+            assertionFailure("TrackerStore.save 失败: \(error)")
+        }
+    }
+
+    private func nextDefaultName() -> String {
+        let req = Tracker.fetchRequest()
+        let existing = (try? context.fetch(req)) ?? []
+        let prefix = "未命名追踪 "
+        let usedNumbers: Set<Int> = Set(existing.compactMap { tracker in
+            guard tracker.name.hasPrefix(prefix) else { return nil }
+            return Int(tracker.name.dropFirst(prefix.count))
+        })
+        var n = 1
+        while usedNumbers.contains(n) { n += 1 }
+        return "\(prefix)\(n)"
+    }
+}
