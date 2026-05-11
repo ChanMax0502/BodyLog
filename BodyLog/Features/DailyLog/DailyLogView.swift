@@ -6,6 +6,7 @@ struct DailyLogView: View {
     let date: Date
     @StateObject private var store: EntryStore
     @State private var currentIndex: Int = 0
+    @State private var showPicker = false
 
     init(tracker: Tracker, date: Date) {
         self.tracker = tracker
@@ -67,6 +68,27 @@ struct DailyLogView: View {
         }
         .navigationTitle(titleString)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showPicker = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .tint(Color.textPrimary)
+            }
+        }
+        .sheet(isPresented: $showPicker) {
+            PhotoPicker(
+                onPicked: { images in
+                    showPicker = false
+                    try? store.addBatch(images: images, on: date)
+                },
+                onCancel: {
+                    showPicker = false
+                }
+            )
+        }
     }
 
     private var titleString: String {

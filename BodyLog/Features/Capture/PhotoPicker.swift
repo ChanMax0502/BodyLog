@@ -2,15 +2,15 @@ import PhotosUI
 import SwiftUI
 import UIKit
 
-/// 包装 PHPickerViewController（相册选择，免相册权限）。
+/// 包装 PHPickerViewController（相册选择，免相册权限）。支持多选。
 struct PhotoPicker: UIViewControllerRepresentable {
-    var onPicked: (UIImage) -> Void
+    var onPicked: ([UIImage]) -> Void
     var onCancel: () -> Void
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration(photoLibrary: .shared())
         config.filter = .images
-        config.selectionLimit = 1
+        config.selectionLimit = 0
         let vc = PHPickerViewController(configuration: config)
         vc.delegate = context.coordinator
         return vc
@@ -26,18 +26,32 @@ struct PhotoPicker: UIViewControllerRepresentable {
 
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
             picker.dismiss(animated: true)
-            guard let provider = results.first?.itemProvider,
-                  provider.canLoadObject(ofClass: UIImage.self) else {
+            guard !results.isEmpty else {
                 parent.onCancel()
                 return
             }
-            provider.loadObject(ofClass: UIImage.self) { [parent] obj, _ in
-                DispatchQueue.main.async {
+
+            let providers = results.map { $0.itemProvider }
+            var images = Array<UIImage?>(repeating: nil, count: providers.count)
+            let group = DispatchGroup()
+
+            for (idx, provider) in providers.enumerated() {
+                guard provider.canLoadObject(ofClass: UIImage.self) else { continue }
+                group.enter()
+                provider.loadObject(ofClass: UIImage.self) { obj, _ in
                     if let image = obj as? UIImage {
-                        parent.onPicked(image)
-                    } else {
-                        parent.onCancel()
+                        images[idx] = image
                     }
+                    group.leave()
+                }
+            }
+
+            group.notify(queue: .main) { [parent] in
+                let picked = images.compactMap { $0 }
+                if picked.isEmpty {
+                    parent.onCancel()
+                } else {
+                    parent.onPicked(picked)
                 }
             }
         }

@@ -32,6 +32,11 @@ struct TodayMonthGrid: View {
         let day: Int?
     }
 
+    struct DayRef: Hashable {
+        let tracker: Tracker
+        let date: Date
+    }
+
     var body: some View {
         let cal = calendar
         let monthStart = cal.dateInterval(of: .month, for: referenceDate)?.start ?? referenceDate
@@ -93,43 +98,57 @@ private struct TodayDayCell: View {
         let latest = entries.last
         let hasEntry = !entries.isEmpty
 
-        ZStack {
-            RoundedRectangle(cornerRadius: AppRadius.card - 2)
-                .fill(Color.bgSecondary)
+        let cellContent = cellBody(latest: latest, hasEntry: hasEntry, isToday: isToday, isFuture: isFuture, entries: entries)
 
-            if let thumbnail {
-                Image(uiImage: thumbnail)
-                    .resizable()
-                    .scaledToFill()
-            } else if !hasEntry {
-                Text("\(day)")
-                    .font(.bud.regular(size: 15))
-                    .foregroundStyle(Color.textPrimary)
+        if isFuture {
+            cellContent
+        } else {
+            NavigationLink(value: TodayMonthGrid.DayRef(tracker: tracker, date: date)) {
+                cellContent
             }
+            .buttonStyle(.plain)
+        }
+    }
 
-            if isToday {
-                RoundedRectangle(cornerRadius: AppRadius.card - 2)
-                    .strokeBorder(Color.accentClay, lineWidth: 2.5)
+    @ViewBuilder
+    private func cellBody(latest: Entry?, hasEntry: Bool, isToday: Bool, isFuture: Bool, entries: [Entry]) -> some View {
+        RoundedRectangle(cornerRadius: AppRadius.card - 2)
+            .fill(Color.bgSecondary)
+            .aspectRatio(aspectRatio, contentMode: .fit)
+            .overlay {
+                if let thumbnail {
+                    Image(uiImage: thumbnail)
+                        .resizable()
+                        .scaledToFill()
+                } else if !hasEntry {
+                    Text("\(day)")
+                        .font(.bud.regular(size: 15))
+                        .foregroundStyle(Color.textPrimary)
+                }
             }
-        }
-        .aspectRatio(aspectRatio, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: AppRadius.card - 2))
-        .overlay(alignment: .topTrailing) {
-            if entries.count > 1 {
-                Text("\(entries.count)")
-                    .font(.bud.semibold(size: 10))
-                    .foregroundStyle(.white)
-                    .frame(minWidth: 18, minHeight: 18)
-                    .padding(.horizontal, 4)
-                    .background(Color.accentClay)
-                    .clipShape(Capsule())
-                    .offset(x: 4, y: -4)
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.card - 2))
+            .overlay {
+                if isToday {
+                    RoundedRectangle(cornerRadius: AppRadius.card - 2)
+                        .strokeBorder(Color.accentClay, lineWidth: 2.5)
+                }
             }
-        }
-        .opacity(isFuture ? 0.4 : 1.0)
-        .task(id: latest?.id) {
-            await loadThumbnail(entry: latest)
-        }
+            .overlay(alignment: .topTrailing) {
+                if entries.count > 1 {
+                    Text("\(entries.count)")
+                        .font(.bud.semibold(size: 10))
+                        .foregroundStyle(.white)
+                        .frame(minWidth: 18, minHeight: 18)
+                        .padding(.horizontal, 4)
+                        .background(Color.accentClay)
+                        .clipShape(Capsule())
+                        .offset(x: 4, y: -4)
+                }
+            }
+            .opacity(isFuture ? 0.4 : 1.0)
+            .task(id: latest?.id) {
+                await loadThumbnail(entry: latest)
+            }
     }
 
     private func loadThumbnail(entry: Entry?) async {

@@ -32,6 +32,9 @@ struct TodayView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(for: TodayMonthGrid.DayRef.self) { ref in
+                DailyLogView(tracker: ref.tracker, date: ref.date)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {

@@ -8,11 +8,25 @@ final class EntryStore: ObservableObject {
 
     let tracker: Tracker
     private let context: NSManagedObjectContext
+    private var saveObserver: NSObjectProtocol?
 
     init(tracker: Tracker, context: NSManagedObjectContext) {
         self.tracker = tracker
         self.context = context
         reload()
+        saveObserver = NotificationCenter.default.addObserver(
+            forName: .NSManagedObjectContextDidSave,
+            object: context,
+            queue: .main
+        ) { [weak self] _ in
+            self?.reload()
+        }
+    }
+
+    deinit {
+        if let saveObserver {
+            NotificationCenter.default.removeObserver(saveObserver)
+        }
     }
 
     func reload() {
@@ -67,6 +81,25 @@ final class EntryStore: ObservableObject {
         try context.save()
         reload()
         return entry
+    }
+
+    func addBatch(images: [UIImage], on day: Date = Date()) throws {
+        guard !images.isEmpty else { return }
+        let normalizedDay = Calendar.current.startOfDay(for: day)
+        for image in images {
+            let id = UUID()
+            let relPath = try ImageStorage.shared.save(image, trackerId: tracker.id, entryId: id)
+            let entry = Entry(context: context)
+            entry.id = id
+            entry.trackerId = tracker.id
+            entry.tracker = tracker
+            entry.date = normalizedDay
+            entry.photoLocalPath = relPath
+            entry.note = nil
+            entry.createdAt = Date()
+        }
+        try context.save()
+        reload()
     }
 
     func delete(_ entry: Entry) {
