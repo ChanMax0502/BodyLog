@@ -6,7 +6,7 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            HomeView()
+            MainTabView()
                 .opacity(showHome ? 1 : 0)
 
             if appLockEnabled && !isUnlocked {

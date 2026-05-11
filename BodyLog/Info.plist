@@ -48,5 +48,12 @@
 	<string>用于把记录照片保存到系统相册，由你手动触发。</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>用于开启应用锁，保护你的身体记录隐私。</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>CourierPrime-Regular.ttf</string>
+		<string>CourierPrime-Bold.ttf</string>
+		<string>CourierPrime-Italic.ttf</string>
+		<string>CourierPrime-BoldItalic.ttf</string>
+	</array>
 </dict>
 </plist>

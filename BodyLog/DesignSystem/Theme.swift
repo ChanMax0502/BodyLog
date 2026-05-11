@@ -1,12 +1,12 @@
 import SwiftUI
 
 enum AppFont {
-    static let largeTitle  = Font.system(.largeTitle, design: .default).weight(.semibold)
-    static let title       = Font.system(.title2, design: .default).weight(.semibold)
-    static let cardTitle   = Font.system(.headline, design: .default).weight(.semibold)
-    static let body        = Font.system(.body)
-    static let footnote    = Font.system(.footnote)
-    static let caption     = Font.system(.caption)
+    static let largeTitle  = Font.bud.bold(size: 34)
+    static let title       = Font.bud.bold(size: 22)
+    static let cardTitle   = Font.bud.semibold(size: 17)
+    static let body        = Font.bud.regular(size: 17)
+    static let footnote    = Font.bud.regular(size: 13)
+    static let caption     = Font.bud.regular(size: 12)
 }
 
 enum AppDuration {

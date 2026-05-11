@@ -113,7 +113,7 @@ private struct MiniDayDot: View {
                     .frame(width: 8, height: 8)
             } else {
                 Text("\(day)")
-                    .font(.system(size: 9))
+                    .font(.bud.regular(size: 9))
                     .foregroundStyle(isToday ? Color.textPrimary : Color.textSecondary)
             }
             if isToday {

@@ -39,7 +39,7 @@ struct HomeView: View {
                     }
                 }
             }
-            .navigationTitle("BodyLog")
+            .navigationTitle("追踪")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

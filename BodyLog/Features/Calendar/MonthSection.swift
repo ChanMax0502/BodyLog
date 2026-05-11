@@ -61,7 +61,7 @@ private struct DayCell: View {
                         HStack {
                             Spacer()
                             Text("+\(entries.count - 1)")
-                                .font(.system(size: 9, weight: .semibold))
+                                .font(.bud.semibold(size: 9))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 4)
                                 .padding(.vertical, 1)
@@ -73,7 +73,7 @@ private struct DayCell: View {
                 }
             } else {
                 Text("\(day)")
-                    .font(.system(size: 14))
+                    .font(.bud.regular(size: 14))
                     .foregroundStyle(isFuture ? Color.textSecondary.opacity(0.4) : Color.textSecondary)
             }
         }
