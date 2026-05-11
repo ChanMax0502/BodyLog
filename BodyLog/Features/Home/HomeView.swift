@@ -6,8 +6,8 @@ struct HomeView: View {
     @State private var showAppSettings = false
 
     private let columns = [
-        GridItem(.flexible(), spacing: AppSpacing.l),
-        GridItem(.flexible(), spacing: AppSpacing.l),
+        GridItem(.flexible(), spacing: 15),
+        GridItem(.flexible(), spacing: 15),
     ]
 
     var body: some View {
@@ -16,7 +16,7 @@ struct HomeView: View {
                 Color.bgPrimary.ignoresSafeArea()
 
                 ScrollView {
-                    LazyVGrid(columns: columns, spacing: AppSpacing.l) {
+                    LazyVGrid(columns: columns, spacing: 15) {
                         AddTrackerCard {
                             showCreate = true
                         }
@@ -28,7 +28,7 @@ struct HomeView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding(.horizontal, AppSpacing.l)
+                    .padding(.horizontal, 15)
                     .padding(.top, AppSpacing.l)
 
                     if store.trackers.isEmpty {

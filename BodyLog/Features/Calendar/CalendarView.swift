@@ -4,6 +4,8 @@ struct CalendarView: View {
     let tracker: Tracker
     @StateObject private var store: EntryStore
     @State private var showSettings = false
+    @State private var currentMonth: Date
+    @State private var slideEdge: Edge = .bottom
 
     init(tracker: Tracker) {
         self.tracker = tracker
@@ -13,40 +15,33 @@ struct CalendarView: View {
                 context: PersistenceController.shared.container.viewContext
             )
         )
+        let cal = Calendar.current
+        let start = cal.dateInterval(of: .month, for: Date())?.start ?? Date()
+        _currentMonth = State(initialValue: start)
     }
 
     var body: some View {
         ZStack {
             Color.bgPrimary.ignoresSafeArea()
 
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: AppSpacing.xl, pinnedViews: [.sectionHeaders]) {
-                        ForEach(months(), id: \.self) { monthStart in
-                            Section {
-                                MonthSection(month: monthStart, tracker: tracker, store: store)
-                            } header: {
-                                MonthHeader(month: monthStart)
-                            }
-                            .id(monthStart)
-                        }
-                    }
-                    .padding(.horizontal, AppSpacing.l)
-                    .padding(.bottom, AppSpacing.xxl)
-                }
-                .onAppear {
-                    let cal = Calendar.current
-                    if let cur = cal.dateInterval(of: .month, for: Date())?.start {
-                        proxy.scrollTo(cur, anchor: .top)
-                    }
-                }
-            }
+            VStack(spacing: AppSpacing.s) {
+                summaryBar(for: currentMonth)
+                monthLabel(for: currentMonth)
 
-            VStack(spacing: 0) {
-                summaryBar
-                    .background(Color.bgPrimary.opacity(0.95))
+                ZStack {
+                    TodayMonthGrid(tracker: tracker, referenceDate: currentMonth)
+                        .id(currentMonth)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: slideEdge).combined(with: .opacity),
+                            removal: .move(edge: oppositeEdge(slideEdge)).combined(with: .opacity)
+                        ))
+                }
+
                 Spacer()
             }
+            .padding(.horizontal, AppSpacing.l)
+            .contentShape(Rectangle())
+            .gesture(verticalDragGesture)
         }
         .navigationTitle(tracker.name)
         .navigationBarTitleDisplayMode(.inline)
@@ -65,38 +60,18 @@ struct CalendarView: View {
         }
     }
 
-    private var summaryBar: some View {
+    private func summaryBar(for month: Date) -> some View {
         let cal = Calendar.current
-        let punched = store.punchedDaysInMonth()
-        let total = cal.range(of: .day, in: .month, for: Date())?.count ?? 30
-        return Text("本月已打卡 \(punched) / \(total) 天")
+        let punched = store.punchedDaysInMonth(month)
+        let total = cal.range(of: .day, in: .month, for: month)?.count ?? 30
+        return Text("已打卡 \(punched) / \(total) 天")
             .font(AppFont.footnote)
             .foregroundStyle(Color.textSecondary)
             .padding(.vertical, AppSpacing.s)
             .frame(maxWidth: .infinity)
     }
 
-    /// 从 Tracker.createdAt 所在月一直到当前月，按时间倒序展示（最新月在最上面）。
-    private func months() -> [Date] {
-        let cal = Calendar.current
-        guard
-            let start = cal.dateInterval(of: .month, for: tracker.createdAt)?.start,
-            let end = cal.dateInterval(of: .month, for: Date())?.start
-        else { return [] }
-        var months: [Date] = []
-        var cursor = end
-        while cursor >= start {
-            months.append(cursor)
-            guard let prev = cal.date(byAdding: .month, value: -1, to: cursor) else { break }
-            cursor = prev
-        }
-        return months
-    }
-}
-
-private struct MonthHeader: View {
-    let month: Date
-    var body: some View {
+    private func monthLabel(for month: Date) -> some View {
         let df = DateFormatter()
         df.locale = Locale(identifier: "zh_CN")
         df.dateFormat = "yyyy 年 M 月"
@@ -104,7 +79,53 @@ private struct MonthHeader: View {
             .font(AppFont.title)
             .foregroundStyle(Color.textPrimary)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, AppSpacing.s)
-            .background(Color.bgPrimary)
+    }
+
+    private var verticalDragGesture: some Gesture {
+        DragGesture(minimumDistance: 20)
+            .onEnded { value in
+                let dy = value.translation.height
+                guard abs(dy) > 50 else { return }
+                if dy < 0 {
+                    goToNextMonth()
+                } else {
+                    goToPreviousMonth()
+                }
+            }
+    }
+
+    private func goToNextMonth() {
+        let cal = Calendar.current
+        guard
+            let next = cal.date(byAdding: .month, value: 1, to: currentMonth),
+            let upperBound = cal.dateInterval(of: .month, for: Date())?.start,
+            next <= upperBound
+        else { return }
+        slideEdge = .bottom
+        withAnimation(.easeInOut(duration: 0.25)) {
+            currentMonth = next
+        }
+    }
+
+    private func goToPreviousMonth() {
+        let cal = Calendar.current
+        guard
+            let prev = cal.date(byAdding: .month, value: -1, to: currentMonth),
+            let lowerBound = cal.dateInterval(of: .month, for: tracker.createdAt)?.start,
+            prev >= lowerBound
+        else { return }
+        slideEdge = .top
+        withAnimation(.easeInOut(duration: 0.25)) {
+            currentMonth = prev
+        }
+    }
+
+    private func oppositeEdge(_ edge: Edge) -> Edge {
+        switch edge {
+        case .top: return .bottom
+        case .bottom: return .top
+        case .leading: return .trailing
+        case .trailing: return .leading
+        }
     }
 }

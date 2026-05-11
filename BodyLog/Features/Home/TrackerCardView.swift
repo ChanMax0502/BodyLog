@@ -38,7 +38,7 @@ struct TrackerCardView: View {
             RoundedRectangle(cornerRadius: AppRadius.card)
                 .strokeBorder(Color.appSeparator, lineWidth: 0.5)
         )
-        .aspectRatio(0.85, contentMode: .fit)
+        .aspectRatio(1, contentMode: .fit)
     }
 }
 
