@@ -94,7 +94,7 @@ private struct TodayDayCell: View {
         let hasEntry = !entries.isEmpty
 
         ZStack {
-            RoundedRectangle(cornerRadius: AppRadius.card)
+            RoundedRectangle(cornerRadius: AppRadius.card - 2)
                 .fill(Color.bgSecondary)
 
             if let thumbnail {
@@ -108,12 +108,12 @@ private struct TodayDayCell: View {
             }
 
             if isToday {
-                RoundedRectangle(cornerRadius: AppRadius.card)
+                RoundedRectangle(cornerRadius: AppRadius.card - 2)
                     .strokeBorder(Color.accentClay, lineWidth: 2.5)
             }
         }
         .aspectRatio(aspectRatio, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: AppRadius.card))
+        .clipShape(RoundedRectangle(cornerRadius: AppRadius.card - 2))
         .overlay(alignment: .topTrailing) {
             if entries.count > 1 {
                 Text("\(entries.count)")
