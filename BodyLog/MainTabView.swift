@@ -13,6 +13,6 @@ struct MainTabView: View {
                     Label("追踪", systemImage: "square.stack.fill")
                 }
         }
-        .tint(Color.accentBlue)
+        .tint(BrandColor.primary)
     }
 }

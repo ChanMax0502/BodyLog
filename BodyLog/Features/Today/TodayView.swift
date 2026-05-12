@@ -13,7 +13,7 @@ struct TodayView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bgPrimary.ignoresSafeArea()
+                BrandColor.surfaceCreamStrong.ignoresSafeArea()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: AppSpacing.l) {

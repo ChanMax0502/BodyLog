@@ -14,30 +14,28 @@ struct TrackerCardView: View {
     var body: some View {
         VStack(spacing: 0) {
             MiniMonthGrid(punchedDays: entryStore.punchedDaysSetCurrentMonth)
-                .padding(AppSpacing.m)
+                .padding(BrandSpacing.md)
                 .frame(maxWidth: .infinity)
-                .background(Color.bgSecondary)
+                .background(BrandColor.canvas)
 
-            Divider().background(Color.appSeparator)
+            Rectangle()
+                .fill(BrandColor.hairline)
+                .frame(height: 1)
 
-            VStack(alignment: .leading, spacing: AppSpacing.xs) {
+            VStack(alignment: .leading, spacing: BrandSpacing.xxs) {
                 Text(tracker.name)
-                    .font(AppFont.cardTitle)
-                    .foregroundStyle(Color.textPrimary)
+                    .font(BrandFont.titleSM)
+                    .foregroundColor(BrandColor.ink)
                     .lineLimit(1)
                 Text("本月已打卡 \(entryStore.punchedDaysSetCurrentMonth.count) 天")
-                    .font(AppFont.caption)
-                    .foregroundStyle(Color.textSecondary)
+                    .font(BrandFont.caption)
+                    .foregroundColor(BrandColor.muted)
             }
-            .padding(AppSpacing.m)
+            .padding(BrandSpacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .background(Color.bgSecondary)
-        .clipShape(RoundedRectangle(cornerRadius: AppRadius.card))
-        .overlay(
-            RoundedRectangle(cornerRadius: AppRadius.card)
-                .strokeBorder(Color.appSeparator, lineWidth: 0.5)
-        )
+        .background(BrandColor.surfaceCard)
+        .clipShape(RoundedRectangle(cornerRadius: BrandRadius.lg))
         .aspectRatio(1, contentMode: .fit)
     }
 }
@@ -109,16 +107,16 @@ private struct MiniDayDot: View {
         ZStack {
             if isPunched {
                 Circle()
-                    .fill(Color.accentGreen)
+                    .fill(BrandColor.success)
                     .frame(width: 8, height: 8)
             } else {
                 Text("\(day)")
-                    .font(.bud.regular(size: 9))
-                    .foregroundStyle(isToday ? Color.textPrimary : Color.textSecondary)
+                    .font(.system(size: 9, weight: .regular))
+                    .foregroundColor(isToday ? BrandColor.ink : BrandColor.mutedSoft)
             }
             if isToday {
                 Circle()
-                    .strokeBorder(Color.accentBlue, lineWidth: 1)
+                    .strokeBorder(BrandColor.primary, lineWidth: 1)
                     .frame(width: 14, height: 14)
             }
         }

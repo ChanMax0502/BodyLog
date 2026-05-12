@@ -76,7 +76,7 @@ struct TodayMonthGrid: View {
         .padding(.horizontal, 15)
         .background(
             RoundedRectangle(cornerRadius: AppRadius.card)
-                .fill(Color.white.opacity(0.55))
+                .fill(BrandColor.canvas)
                 .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 6)
         )
     }
@@ -112,8 +112,8 @@ private struct TodayDayCell: View {
 
     @ViewBuilder
     private func cellBody(latest: Entry?, hasEntry: Bool, isToday: Bool, isFuture: Bool, entries: [Entry]) -> some View {
-        RoundedRectangle(cornerRadius: AppRadius.card - 2)
-            .fill(Color.bgSecondary)
+        RoundedRectangle(cornerRadius: AppRadius.card)
+            .fill(isFuture ? BrandColor.hairlineSoft : BrandColor.surfaceCard)
             .aspectRatio(aspectRatio, contentMode: .fit)
             .overlay {
                 if let thumbnail {
@@ -123,29 +123,32 @@ private struct TodayDayCell: View {
                 } else if !hasEntry {
                     Text("\(day)")
                         .font(.bud.regular(size: 15))
-                        .foregroundStyle(Color.textPrimary)
+                        .foregroundColor(isFuture ? BrandColor.mutedSoft : BrandColor.ink)
                 }
             }
-            .clipShape(RoundedRectangle(cornerRadius: AppRadius.card - 2))
+            .clipShape(RoundedRectangle(cornerRadius: AppRadius.card))
+            .overlay {
+                RoundedRectangle(cornerRadius: AppRadius.card)
+                    .strokeBorder(BrandColor.hairline, lineWidth: 0.5)
+            }
             .overlay {
                 if isToday {
-                    RoundedRectangle(cornerRadius: AppRadius.card - 2)
-                        .strokeBorder(Color.accentClay, lineWidth: 2.5)
+                    RoundedRectangle(cornerRadius: AppRadius.card)
+                        .strokeBorder(BrandColor.primary, lineWidth: 2.5)
                 }
             }
             .overlay(alignment: .topTrailing) {
                 if entries.count > 1 {
                     Text("\(entries.count)")
-                        .font(.bud.semibold(size: 10))
-                        .foregroundStyle(.white)
+                        .font(.bud.bold(size: 10))
+                        .foregroundColor(BrandColor.onPrimary)
                         .frame(minWidth: 18, minHeight: 18)
                         .padding(.horizontal, 4)
-                        .background(Color.accentClay)
+                        .background(BrandColor.primary)
                         .clipShape(Capsule())
                         .offset(x: 4, y: -4)
                 }
             }
-            .opacity(isFuture ? 0.4 : 1.0)
             .task(id: latest?.id) {
                 await loadThumbnail(entry: latest)
             }

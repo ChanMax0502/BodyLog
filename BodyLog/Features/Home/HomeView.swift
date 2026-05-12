@@ -6,49 +6,58 @@ struct HomeView: View {
     @State private var showAppSettings = false
 
     private let columns = [
-        GridItem(.flexible(), spacing: 15),
-        GridItem(.flexible(), spacing: 15),
+        GridItem(.flexible(), spacing: BrandSpacing.md),
+        GridItem(.flexible(), spacing: BrandSpacing.md),
     ]
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bgPrimary.ignoresSafeArea()
+                BrandColor.canvas.ignoresSafeArea()
 
                 ScrollView {
-                    LazyVGrid(columns: columns, spacing: 15) {
-                        AddTrackerCard {
-                            showCreate = true
-                        }
+                    VStack(alignment: .leading, spacing: BrandSpacing.lg) {
+                        Text("追踪")
+                            .font(BrandFont.displayMD)
+                            .tracking(BrandTracking.displayMD)
+                            .foregroundColor(BrandColor.ink)
+                            .padding(.horizontal, BrandSpacing.md)
+                            .padding(.top, BrandSpacing.xs)
 
-                        ForEach(store.trackers) { tracker in
-                            NavigationLink(value: tracker) {
-                                TrackerCardView(tracker: tracker)
+                        LazyVGrid(columns: columns, spacing: BrandSpacing.md) {
+                            AddTrackerCard {
+                                showCreate = true
                             }
-                            .buttonStyle(.plain)
+
+                            ForEach(store.trackers) { tracker in
+                                NavigationLink(value: tracker) {
+                                    TrackerCardView(tracker: tracker)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal, BrandSpacing.md)
+
+                        if store.trackers.isEmpty {
+                            Text("点击 + 创建你的第一个追踪")
+                                .font(BrandFont.bodySM)
+                                .foregroundColor(BrandColor.muted)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.top, BrandSpacing.xs)
                         }
                     }
-                    .padding(.horizontal, 15)
-                    .padding(.top, AppSpacing.l)
-
-                    if store.trackers.isEmpty {
-                        Text("点击 + 创建你的第一个追踪")
-                            .font(AppFont.footnote)
-                            .foregroundStyle(Color.textSecondary)
-                            .padding(.top, AppSpacing.m)
-                    }
+                    .padding(.bottom, BrandSpacing.xl)
                 }
             }
-            .navigationTitle("追踪")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
                         showAppSettings = true
                     } label: {
                         Image(systemName: "gearshape")
                     }
-                    .tint(Color.textPrimary)
+                    .tint(BrandColor.ink)
                 }
             }
             .sheet(isPresented: $showCreate) {
@@ -71,19 +80,19 @@ private struct AddTrackerCard: View {
     var body: some View {
         Button(action: action) {
             ZStack {
-                RoundedRectangle(cornerRadius: AppRadius.card)
-                    .strokeBorder(
-                        Color.appSeparator,
-                        style: StrokeStyle(lineWidth: 1.5, dash: [6, 4])
-                    )
-                    .background(
-                        RoundedRectangle(cornerRadius: AppRadius.card)
-                            .fill(Color.bgSecondary.opacity(0.4))
+                RoundedRectangle(cornerRadius: BrandRadius.lg)
+                    .fill(BrandColor.surfaceSoft)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: BrandRadius.lg)
+                            .strokeBorder(
+                                BrandColor.hairline,
+                                style: StrokeStyle(lineWidth: 1.5, dash: [6, 4])
+                            )
                     )
 
                 Image(systemName: "plus")
-                    .font(.system(size: 44, weight: .regular))
-                    .foregroundStyle(Color.textSecondary)
+                    .font(.system(size: 36, weight: .regular))
+                    .foregroundColor(BrandColor.primary)
             }
             .aspectRatio(1, contentMode: .fit)
         }
