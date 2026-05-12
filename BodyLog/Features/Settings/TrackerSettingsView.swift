@@ -17,42 +17,65 @@ struct TrackerSettingsView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("基本信息") {
-                    HStack {
-                        Text("名称")
-                        Spacer()
-                        TextField("名称", text: $nameDraft)
-                            .focused($nameFocused)
-                            .multilineTextAlignment(.trailing)
-                            .foregroundStyle(Color.textSecondary)
-                            .submitLabel(.done)
-                            .onSubmit { commitName() }
-                    }
-                    if let goal = tracker.goalDescription, !goal.isEmpty {
-                        HStack(alignment: .top) {
-                            Text("目标")
+            ZStack {
+                BrandColor.surfaceCreamStrong.ignoresSafeArea()
+
+                Form {
+                    Section {
+                        HStack {
+                            Text("名称").foregroundColor(BrandColor.ink)
                             Spacer()
-                            Text(goal).foregroundStyle(Color.textSecondary).multilineTextAlignment(.trailing)
+                            TextField("名称", text: $nameDraft)
+                                .focused($nameFocused)
+                                .multilineTextAlignment(.trailing)
+                                .foregroundColor(BrandColor.muted)
+                                .tint(BrandColor.primary)
+                                .submitLabel(.done)
+                                .onSubmit { commitName() }
                         }
-                    }
-                }
+                        .listRowBackground(BrandColor.surfaceSoft)
 
-                Section("每日提醒") {
-                    Toggle("开启提醒", isOn: $reminderEnabled)
-                    if reminderEnabled {
-                        DatePicker("时间", selection: $reminderTime, displayedComponents: .hourAndMinute)
+                        if let goal = tracker.goalDescription, !goal.isEmpty {
+                            HStack(alignment: .top) {
+                                Text("目标").foregroundColor(BrandColor.ink)
+                                Spacer()
+                                Text(goal)
+                                    .foregroundColor(BrandColor.muted)
+                                    .multilineTextAlignment(.trailing)
+                            }
+                            .listRowBackground(BrandColor.surfaceSoft)
+                        }
+                    } header: {
+                        brandSectionHeader("基本信息")
                     }
-                }
 
-                Section {
-                    Button(role: .destructive) {
-                        showDeleteConfirm = true
-                    } label: {
-                        Text("删除追踪")
-                            .frame(maxWidth: .infinity)
+                    Section {
+                        Toggle("开启提醒", isOn: $reminderEnabled)
+                            .tint(BrandColor.primary)
+                            .foregroundColor(BrandColor.ink)
+                            .listRowBackground(BrandColor.surfaceSoft)
+                        if reminderEnabled {
+                            DatePicker("时间", selection: $reminderTime, displayedComponents: .hourAndMinute)
+                                .tint(BrandColor.primary)
+                                .foregroundColor(BrandColor.ink)
+                                .listRowBackground(BrandColor.surfaceSoft)
+                        }
+                    } header: {
+                        brandSectionHeader("每日提醒")
+                    }
+
+                    Section {
+                        Button(role: .destructive) {
+                            showDeleteConfirm = true
+                        } label: {
+                            Text("删除追踪")
+                                .foregroundColor(BrandColor.error)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .listRowBackground(BrandColor.surfaceSoft)
                     }
                 }
+                .scrollContentBackground(.hidden)
             }
             .navigationTitle("追踪设置")
             .navigationBarTitleDisplayMode(.inline)
@@ -67,7 +90,7 @@ struct TrackerSettingsView: View {
                         commitName()
                         dismiss()
                     }
-                    .tint(Color.accentBlue)
+                    .tint(BrandColor.primary)
                 }
             }
             .confirmationDialog(
@@ -87,5 +110,13 @@ struct TrackerSettingsView: View {
     private func commitName() {
         trackerStore.rename(tracker, to: nameDraft)
         nameDraft = tracker.name
+    }
+
+    private func brandSectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(BrandFont.captionUppercase)
+            .tracking(BrandTracking.captionUppercase)
+            .textCase(.uppercase)
+            .foregroundColor(BrandColor.muted)
     }
 }
