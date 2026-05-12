@@ -26,18 +26,22 @@ struct CreateTrackerView: View {
                             .padding(AppSpacing.m)
                             .background(Color.bgSecondary)
                             .clipShape(RoundedRectangle(cornerRadius: AppRadius.button))
+                            .contentShape(RoundedRectangle(cornerRadius: AppRadius.button))
+                            .onTapGesture { focusedField = .name }
                     }
 
                     VStack(alignment: .leading, spacing: AppSpacing.s) {
                         Text("目标描述（可选，最多 100 字）")
                             .font(AppFont.footnote)
                             .foregroundStyle(Color.textSecondary)
-                        TextField("例如「使用米诺地尔，每周拍 3 次」", text: $goal, axis: .vertical)
+                        TextField("例如「记录左臂维变化，每周拍 3 次」", text: $goal, axis: .vertical)
                             .focused($focusedField, equals: .goal)
                             .lineLimit(3...5)
                             .padding(AppSpacing.m)
                             .background(Color.bgSecondary)
                             .clipShape(RoundedRectangle(cornerRadius: AppRadius.button))
+                            .contentShape(RoundedRectangle(cornerRadius: AppRadius.button))
+                            .onTapGesture { focusedField = .goal }
                             .onChange(of: goal) { newValue in
                                 if newValue.count > 100 {
                                     goal = String(newValue.prefix(100))
@@ -49,6 +53,8 @@ struct CreateTrackerView: View {
                 }
                 .padding(AppSpacing.l)
             }
+            .contentShape(Rectangle())
+            .onTapGesture { focusedField = nil }
             .navigationTitle("新建追踪")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
