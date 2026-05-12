@@ -13,7 +13,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                BrandColor.canvas.ignoresSafeArea()
+                BrandColor.surfaceCreamStrong.ignoresSafeArea()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: BrandSpacing.lg) {

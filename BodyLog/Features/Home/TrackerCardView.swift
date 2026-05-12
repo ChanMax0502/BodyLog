@@ -37,6 +37,7 @@ struct TrackerCardView: View {
         .background(BrandColor.surfaceCard)
         .clipShape(RoundedRectangle(cornerRadius: BrandRadius.lg))
         .aspectRatio(1, contentMode: .fit)
+        .brandShadow(.subtle)
     }
 }
 
