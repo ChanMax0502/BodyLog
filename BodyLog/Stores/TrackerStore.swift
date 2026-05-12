@@ -54,6 +54,14 @@ final class TrackerStore: ObservableObject {
         return tracker
     }
 
+    func rename(_ tracker: Tracker, to rawName: String) {
+        let trimmed = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed != tracker.name else { return }
+        tracker.name = trimmed
+        save()
+        reload()
+    }
+
     func delete(_ tracker: Tracker) {
         let id = tracker.id
         try? ImageStorage.shared.deleteAll(trackerId: id)

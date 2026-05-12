@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct TodayView: View {
     @EnvironmentObject private var trackerStore: TrackerStore
@@ -6,6 +7,8 @@ struct TodayView: View {
     @State private var currentDate: Date = Date()
     @State private var showAppSettings = false
     @State private var showCreate = false
+    @State private var showPhotoPicker = false
+    @State private var pickedImages: PickedImages?
 
     var body: some View {
         NavigationStack {
@@ -44,6 +47,16 @@ struct TodayView: View {
                     }
                     .tint(Color.textPrimary)
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    if trackerStore.trackers.first != nil {
+                        Button {
+                            showPhotoPicker = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                        .tint(Color.textPrimary)
+                    }
+                }
             }
             .sheet(isPresented: $showAppSettings) {
                 AppSettingsView()
@@ -51,6 +64,26 @@ struct TodayView: View {
             .sheet(isPresented: $showCreate) {
                 CreateTrackerView()
                     .environmentObject(trackerStore)
+            }
+            .sheet(isPresented: $showPhotoPicker) {
+                PhotoPicker(
+                    onPicked: { images in
+                        showPhotoPicker = false
+                        handlePicked(images)
+                    },
+                    onCancel: {
+                        showPhotoPicker = false
+                    }
+                )
+            }
+            .sheet(item: $pickedImages) { wrapper in
+                if let tracker = trackerStore.trackers.first, let single = wrapper.images.first {
+                    CaptureConfirmView(
+                        image: single,
+                        tracker: tracker,
+                        onSaved: { pickedImages = nil }
+                    )
+                }
             }
         }
         .onChange(of: scenePhase) { phase in
@@ -78,6 +111,21 @@ struct TodayView: View {
         df.dateFormat = "EEE, MMM d, yyyy"
         return df
     }()
+
+    private func handlePicked(_ images: [UIImage]) {
+        guard let tracker = trackerStore.trackers.first, !images.isEmpty else { return }
+        if images.count == 1 {
+            pickedImages = PickedImages(images: images)
+        } else {
+            let store = EntryStore(tracker: tracker, context: PersistenceController.shared.container.viewContext)
+            try? store.addBatch(images: images)
+        }
+    }
+
+    private struct PickedImages: Identifiable {
+        let id = UUID()
+        let images: [UIImage]
+    }
 }
 
 private struct EmptyTrackerCard: View {

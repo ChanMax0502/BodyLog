@@ -5,6 +5,8 @@ struct TrackerSettingsView: View {
     @EnvironmentObject private var trackerStore: TrackerStore
     @Environment(\.dismiss) private var dismiss
     @State private var showDeleteConfirm = false
+    @State private var nameDraft: String = ""
+    @FocusState private var nameFocused: Bool
     @State private var reminderEnabled = false
     @State private var reminderTime: Date = {
         var comp = DateComponents()
@@ -20,7 +22,12 @@ struct TrackerSettingsView: View {
                     HStack {
                         Text("名称")
                         Spacer()
-                        Text(tracker.name).foregroundStyle(Color.textSecondary)
+                        TextField("名称", text: $nameDraft)
+                            .focused($nameFocused)
+                            .multilineTextAlignment(.trailing)
+                            .foregroundStyle(Color.textSecondary)
+                            .submitLabel(.done)
+                            .onSubmit { commitName() }
                     }
                     if let goal = tracker.goalDescription, !goal.isEmpty {
                         HStack(alignment: .top) {
@@ -49,10 +56,18 @@ struct TrackerSettingsView: View {
             }
             .navigationTitle("追踪设置")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear { nameDraft = tracker.name }
+            .onChange(of: nameFocused) { focused in
+                if !focused { commitName() }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("完成") { dismiss() }
-                        .tint(Color.accentBlue)
+                    Button("完成") {
+                        if nameFocused { nameFocused = false }
+                        commitName()
+                        dismiss()
+                    }
+                    .tint(Color.accentBlue)
                 }
             }
             .confirmationDialog(
@@ -67,5 +82,10 @@ struct TrackerSettingsView: View {
                 Button("取消", role: .cancel) {}
             }
         }
+    }
+
+    private func commitName() {
+        trackerStore.rename(tracker, to: nameDraft)
+        nameDraft = tracker.name
     }
 }
