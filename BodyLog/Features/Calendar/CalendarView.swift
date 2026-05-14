@@ -58,6 +58,9 @@ struct CalendarView: View {
         .sheet(isPresented: $showSettings) {
             TrackerSettingsView(tracker: tracker)
         }
+        .navigationDestination(for: TodayMonthGrid.DayRef.self) { ref in
+            DailyLogView(tracker: ref.tracker, date: ref.date)
+        }
     }
 
     private func summaryBar(for month: Date) -> some View {

@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 
 struct TodayView: View {
+    @Binding var path: NavigationPath
     @EnvironmentObject private var trackerStore: TrackerStore
     @Environment(\.scenePhase) private var scenePhase
     @State private var currentDate: Date = Date()
@@ -11,7 +12,7 @@ struct TodayView: View {
     @State private var pickedImages: PickedImages?
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ZStack {
                 BrandColor.surfaceCreamStrong.ignoresSafeArea()
 
@@ -159,11 +160,11 @@ private struct EmptyTrackerCard: View {
 }
 
 #Preview("空态") {
-    TodayView()
+    TodayView(path: .constant(NavigationPath()))
         .environmentObject(TrackerStore(context: PersistenceController(inMemory: true).container.viewContext))
 }
 
 #Preview("有数据") {
-    TodayView()
+    TodayView(path: .constant(NavigationPath()))
         .environmentObject(TrackerStore(context: PersistenceController.preview.container.viewContext))
 }

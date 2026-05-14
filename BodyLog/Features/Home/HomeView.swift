@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @Binding var path: NavigationPath
     @EnvironmentObject private var store: TrackerStore
     @State private var showCreate = false
     @State private var showAppSettings = false
@@ -11,7 +12,7 @@ struct HomeView: View {
     ]
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ZStack {
                 BrandColor.surfaceCreamStrong.ignoresSafeArea()
 
@@ -101,11 +102,11 @@ private struct AddTrackerCard: View {
 }
 
 #Preview("空态") {
-    HomeView()
+    HomeView(path: .constant(NavigationPath()))
         .environmentObject(TrackerStore(context: PersistenceController(inMemory: true).container.viewContext))
 }
 
 #Preview("有数据") {
-    HomeView()
+    HomeView(path: .constant(NavigationPath()))
         .environmentObject(TrackerStore(context: PersistenceController.preview.container.viewContext))
 }

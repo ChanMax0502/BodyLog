@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(xcodegen generate *)",
-      "Bash(xcodebuild -project BodyLog.xcodeproj -scheme BodyLog -destination 'generic/platform=iOS Simulator' -configuration Debug CODE_SIGNING_ALLOWED=NO build)"
+      "Bash(xcodebuild -project BodyLog.xcodeproj -scheme BodyLog -destination 'generic/platform=iOS Simulator' -configuration Debug CODE_SIGNING_ALLOWED=NO build)",
+      "Bash(grep -E \"\\\\.swift$\")"
     ]
   }
 }

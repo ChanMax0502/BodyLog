@@ -7,6 +7,7 @@ struct DailyLogView: View {
     @StateObject private var store: EntryStore
     @State private var currentIndex: Int = 0
     @State private var showPicker = false
+    @State private var showCamera = false
 
     init(tracker: Tracker, date: Date) {
         self.tracker = tracker
@@ -70,13 +71,34 @@ struct DailyLogView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showPicker = true
+                Menu {
+                    Button("打开相册") { showPicker = true }
+                    Button("打开相机") { showCamera = true }
                 } label: {
                     Image(systemName: "plus")
+                        .tint(Color.textPrimary)
                 }
-                .tint(Color.textPrimary)
             }
+        }
+        .fullScreenCover(isPresented: $showCamera) {
+            ImagePicker(
+                source: .camera,
+                onPicked: { image in
+                    showCamera = false
+                    try? store.addBatch(images: [image], on: date)
+                },
+                onCancel: {
+                    showCamera = false
+                },
+                onAlbum: {
+                    showCamera = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showPicker = true
+                    }
+                }
+            )
+            .ignoresSafeArea()
+            .background(Color.black.ignoresSafeArea())
         }
         .sheet(isPresented: $showPicker) {
             PhotoPicker(
