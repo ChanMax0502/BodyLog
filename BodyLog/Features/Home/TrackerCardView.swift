@@ -2,12 +2,16 @@ import SwiftUI
 
 struct TrackerCardView: View {
     let tracker: Tracker
+    var isEditing: Bool = false
+    var isPrimary: Bool = false
     @EnvironmentObject private var trackerStore: TrackerStore
 
     @StateObject private var entryStore: EntryStoreLoader
 
-    init(tracker: Tracker) {
+    init(tracker: Tracker, isEditing: Bool = false, isPrimary: Bool = false) {
         self.tracker = tracker
+        self.isEditing = isEditing
+        self.isPrimary = isPrimary
         _entryStore = StateObject(wrappedValue: EntryStoreLoader(tracker: tracker))
     }
 
@@ -38,6 +42,27 @@ struct TrackerCardView: View {
         .clipShape(RoundedRectangle(cornerRadius: BrandRadius.lg))
         .aspectRatio(1, contentMode: .fit)
         .brandShadow(.subtle)
+        .overlay {
+            if isEditing {
+                ZStack {
+                    RoundedRectangle(cornerRadius: BrandRadius.lg)
+                        .fill(Color.black.opacity(0.35))
+                    Image(systemName: isPrimary ? "pin.fill" : "pin")
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            if isPrimary && !isEditing {
+                Image(systemName: "pin.fill")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(BrandColor.onPrimary)
+                    .padding(6)
+                    .background(Circle().fill(BrandColor.primary))
+                    .offset(x: 6, y: -6)
+            }
+        }
     }
 }
 

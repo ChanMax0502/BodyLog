@@ -22,8 +22,9 @@ struct TodayView: View {
                             .padding(.horizontal, AppSpacing.l)
                             .padding(.top, AppSpacing.s)
 
-                        if let first = trackerStore.trackers.first {
+                        if let first = trackerStore.primaryTracker {
                             TodayMonthGrid(tracker: first, referenceDate: currentDate)
+                                .id(first.id)
                                 .padding(.horizontal, 15)
                         } else {
                             EmptyTrackerCard {
@@ -49,7 +50,7 @@ struct TodayView: View {
                     .tint(Color.textPrimary)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    if trackerStore.trackers.first != nil {
+                    if trackerStore.primaryTracker != nil {
                         Button {
                             showPhotoPicker = true
                         } label: {

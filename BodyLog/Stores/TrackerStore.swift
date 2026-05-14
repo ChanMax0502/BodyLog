@@ -5,8 +5,26 @@ import SwiftUI
 @MainActor
 final class TrackerStore: ObservableObject {
     @Published private(set) var trackers: [Tracker] = []
+    @Published private(set) var primaryTrackerID: UUID? = {
+        guard let str = UserDefaults.standard.string(forKey: TrackerStore.primaryIDKey),
+              let id = UUID(uuidString: str) else { return nil }
+        return id
+    }()
 
+    private static let primaryIDKey = "BodyLog.PrimaryTrackerID"
     private let context: NSManagedObjectContext
+
+    var primaryTracker: Tracker? {
+        if let id = primaryTrackerID, let t = trackers.first(where: { $0.id == id }) {
+            return t
+        }
+        return trackers.last
+    }
+
+    func setPrimary(_ tracker: Tracker) {
+        primaryTrackerID = tracker.id
+        UserDefaults.standard.set(tracker.id.uuidString, forKey: Self.primaryIDKey)
+    }
 
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -27,6 +45,7 @@ final class TrackerStore: ObservableObject {
         tracker.createdAt = Date()
         save()
         reload()
+        setPrimary(tracker)
     }
 
     func reload() {

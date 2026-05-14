@@ -5,6 +5,8 @@ struct HomeView: View {
     @EnvironmentObject private var store: TrackerStore
     @State private var showCreate = false
     @State private var showAppSettings = false
+    @State private var isEditing = false
+    @State private var showPinToast = false
 
     private let columns = [
         GridItem(.flexible(), spacing: BrandSpacing.md),
@@ -15,6 +17,22 @@ struct HomeView: View {
         NavigationStack(path: $path) {
             ZStack {
                 BrandColor.surfaceCreamStrong.ignoresSafeArea()
+
+                if showPinToast {
+                    VStack {
+                        Spacer()
+                        Text("已修改选中的追踪")
+                            .font(AppFont.footnote)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Capsule().fill(Color.black.opacity(0.75)))
+                            .padding(.bottom, 32)
+                    }
+                    .zIndex(1)
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.3), value: showPinToast)
+                }
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: BrandSpacing.lg) {
@@ -31,10 +49,29 @@ struct HomeView: View {
                             }
 
                             ForEach(store.trackers) { tracker in
-                                NavigationLink(value: tracker) {
-                                    TrackerCardView(tracker: tracker)
+                                if isEditing {
+                                    TrackerCardView(
+                                        tracker: tracker,
+                                        isEditing: true,
+                                        isPrimary: store.primaryTracker?.id == tracker.id
+                                    )
+                                    .onTapGesture {
+                                        store.setPrimary(tracker)
+                                        withAnimation { isEditing = false; showPinToast = true }
+                                        Task {
+                                            try? await Task.sleep(for: .seconds(2))
+                                            withAnimation { showPinToast = false }
+                                        }
+                                    }
+                                } else {
+                                    NavigationLink(value: tracker) {
+                                        TrackerCardView(
+                                            tracker: tracker,
+                                            isPrimary: store.primaryTracker?.id == tracker.id
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
                             }
                         }
                         .padding(.horizontal, BrandSpacing.md)
@@ -59,6 +96,16 @@ struct HomeView: View {
                         Image(systemName: "gearshape")
                     }
                     .tint(BrandColor.ink)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    if !store.trackers.isEmpty {
+                        Button {
+                            withAnimation { isEditing.toggle() }
+                        } label: {
+                            Image(systemName: isEditing ? "pin.fill" : "pin")
+                        }
+                        .tint(isEditing ? BrandColor.primary : BrandColor.ink)
+                    }
                 }
             }
             .sheet(isPresented: $showCreate) {
